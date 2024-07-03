@@ -1,10 +1,12 @@
 <?php
 
+
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -12,18 +14,23 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?float $price = null;
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?int $quantity = null;
 
     public function getId(): ?int
@@ -39,7 +46,6 @@ class Product
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -51,7 +57,6 @@ class Product
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -63,7 +68,6 @@ class Product
     public function setPrice(float $price): static
     {
         $this->price = $price;
-
         return $this;
     }
 
@@ -75,7 +79,6 @@ class Product
     public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
-
         return $this;
     }
 }

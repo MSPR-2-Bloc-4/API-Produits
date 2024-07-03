@@ -8,11 +8,28 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
-#[Route('/products')]
 class ProductController extends AbstractController
 {
-    #[Route('/', name: 'create_product', methods: ['POST'])]
+    #[Route('/products', name: 'get_products', methods: ['GET'])]
+    public function getProducts(EntityManagerInterface $em): JsonResponse
+    {
+        $products = $em->getRepository(Product::class)->findAll();
+        return $this->json($products, 200, [], [AbstractNormalizer::GROUPS => 'product:read']);
+    }
+
+    #[Route('/products/{id}', name: 'get_product', methods: ['GET'])]
+    public function getProduct(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $product = $em->getRepository(Product::class)->find($id);
+        if (!$product) {
+            return $this->json(['message' => 'Product not found'], 404);
+        }
+        return $this->json($product, 200, [], [AbstractNormalizer::GROUPS => 'product:read']);
+    }
+
+    #[Route('/products', name: 'create_product', methods: ['POST'])]
     public function createProduct(Request $request, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -26,27 +43,10 @@ class ProductController extends AbstractController
         $em->persist($product);
         $em->flush();
 
-        return $this->json($product, 201);
+        return $this->json($product, 201, [], [AbstractNormalizer::GROUPS => 'product:read']);
     }
 
-    #[Route('/', name: 'get_products', methods: ['GET'])]
-    public function getProducts(EntityManagerInterface $em): JsonResponse
-    {
-        $products = $em->getRepository(Product::class)->findAll();
-        return $this->json($products);
-    }
-
-    #[Route('/{id}', name: 'get_product', methods: ['GET'])]
-    public function getProduct(int $id, EntityManagerInterface $em): JsonResponse
-    {
-        $product = $em->getRepository(Product::class)->find($id);
-        if (!$product) {
-            return $this->json(['message' => 'Product not found'], 404);
-        }
-        return $this->json($product);
-    }
-
-    #[Route('/{id}', name: 'update_product', methods: ['PUT', 'PATCH'])]
+    #[Route('/products/{id}', name: 'update_product', methods: ['PUT', 'PATCH'])]
     public function updateProduct(int $id, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $product = $em->getRepository(Product::class)->find($id);
@@ -62,10 +62,10 @@ class ProductController extends AbstractController
 
         $em->flush();
 
-        return $this->json($product);
+        return $this->json($product, 200, [], [AbstractNormalizer::GROUPS => 'product:read']);
     }
 
-    #[Route('/{id}', name: 'delete_product', methods: ['DELETE'])]
+    #[Route('/products/{id}', name: 'delete_product', methods: ['DELETE'])]
     public function deleteProduct(int $id, EntityManagerInterface $em): JsonResponse
     {
         $product = $em->getRepository(Product::class)->find($id);
@@ -76,6 +76,6 @@ class ProductController extends AbstractController
         $em->remove($product);
         $em->flush();
 
-        return $this->json(['message' => 'Product deleted']);
+        return $this->json(['message' => 'Product deleted'], 200);
     }
 }
