@@ -7,17 +7,42 @@ use PHPUnit\Framework\TestCase;
 
 class ProductTest extends TestCase
 {
-    public function testProductEntity()
+    public function testGetAndSetId()
     {
         $product = new Product();
-        $product->setName('Product 1');
-        $product->setDescription('Description of product 1');
-        $product->setPrice(99.99);
-        $product->setQuantity(10);
+        $reflection = new \ReflectionClass($product);
+        $property = $reflection->getProperty('id');
+        $property->setAccessible(true);
+        $property->setValue($product, 1);
 
-        $this->assertEquals('Product 1', $product->getName());
-        $this->assertEquals('Description of product 1', $product->getDescription());
-        $this->assertEquals(99.99, $product->getPrice());
-        $this->assertEquals(10, $product->getQuantity());
+        $this->assertSame(1, $product->getId());
+    }
+
+    public function testGetAndSetName()
+    {
+        $product = new Product();
+        $product->setName('Test Product');
+        $this->assertSame('Test Product', $product->getName());
+    }
+
+    public function testGetAndSetDescription()
+    {
+        $product = new Product();
+        $product->setDescription('This is a test description.');
+        $this->assertSame('This is a test description.', $product->getDescription());
+    }
+
+    public function testGetAndSetPrice()
+    {
+        $product = new Product();
+        $product->setPrice(19.99);
+        $this->assertSame(19.99, $product->getPrice());
+    }
+
+    public function testGetAndSetQuantity()
+    {
+        $product = new Product();
+        $product->setQuantity(100);
+        $this->assertSame(100, $product->getQuantity());
     }
 }
