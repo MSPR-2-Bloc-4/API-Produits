@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      DATABASE_URL: "mysql://symfony:symfony_password@database:3306/symfony_db"
+    depends_on:
+      - database
+
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: symfony_db
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    ports:
+      - "3306:3306"
+    volumes:
+      - database_data:/var/lib/mysql
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - database
+    ports:
+      - "3000:80"
+    environment:
+      PMA_HOST: database
+      PMA_USER: symfony
+      PMA_PASSWORD: symfony_password
+    depends_on:
+      - database
+
+
+volumes:
+  database_data:
